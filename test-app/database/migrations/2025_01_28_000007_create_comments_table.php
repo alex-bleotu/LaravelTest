@@ -13,7 +13,7 @@ class CreateCommentsTable extends Migration
             $table->foreignId('recipe_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->text('content');
-            $table->integer('rating')->nullable(); // Rating between 1-5
+            $table->integer('rating')->nullable();
             $table->timestamps();
         });
     }

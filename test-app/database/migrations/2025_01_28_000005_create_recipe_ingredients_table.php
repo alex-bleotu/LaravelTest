@@ -12,8 +12,8 @@ class CreateRecipeIngredientsTable extends Migration
             $table->id();
             $table->foreignId('recipe_id')->constrained()->onDelete('cascade');
             $table->foreignId('ingredient_id')->constrained()->onDelete('cascade');
-            $table->decimal('quantity', 8, 2);
-            $table->string('unit')->nullable(); // e.g., grams, cups
+            $table->decimal('quantity', 8, 2)->default(0);
+            $table->string('unit')->nullable(); 
             $table->timestamps();
         });
     }

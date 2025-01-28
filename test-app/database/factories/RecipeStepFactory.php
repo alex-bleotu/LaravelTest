@@ -10,7 +10,7 @@ class RecipeStepFactory extends Factory
     {
         return [
             'recipe_id' => \App\Models\Recipe::factory(),
-            'step_number' => $this->faker->unique()->numberBetween(1, 10),
+            'step_number' => $this->faker->numberBetween(1, 10),
             'description' => $this->faker->sentence(),
             'image_path' => $this->faker->imageUrl(640, 480, 'food', true, 'Recipe Step'),
         ];
