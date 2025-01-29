@@ -7,7 +7,7 @@ use App\Models\Recipe;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-class UserRecipeController extends Controller
+class RecipeController extends Controller
 {
     public function index()
     {
