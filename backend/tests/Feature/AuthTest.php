@@ -5,10 +5,19 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Illuminate\Support\Facades\Session;
+use Laravel\Sanctum\Sanctum;
 
 class AuthTest extends TestCase
 {
     use RefreshDatabase;
+    
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Session::start();
+    }
 
     /**
      * Test successful user registration.
@@ -108,7 +117,7 @@ class AuthTest extends TestCase
     
         $response->assertStatus(401);
         $response->assertJson([
-            'message' => 'The provided credentials are incorrect.',
+            'message' => 'Invalid credentials',
         ]);
     
         $this->assertGuest();
@@ -120,19 +129,18 @@ class AuthTest extends TestCase
     public function test_user_can_logout()
     {
         $user = User::factory()->create();
-    
-        $token = $user->createToken('auth_token')->plainTextToken;
-    
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-        ])->postJson('/api/auth/logout');
-    
+        
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/auth/logout');
+
         $response->assertStatus(200);
         $response->assertJson([
             'message' => 'Logged out successfully',
         ]);
-    
-        $this->assertGuest();
+
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'tokenable_id' => $user->id,
+        ]);
     }
-    
 }
