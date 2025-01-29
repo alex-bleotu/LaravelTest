@@ -22,6 +22,7 @@ class CreateRecipesTable extends Migration
             $table->decimal('total_protein', 8, 2)->nullable();
             $table->decimal('total_fat', 8, 2)->nullable();
             $table->decimal('total_carbs', 8, 2)->nullable();
+            $table->boolean('public')->default(false); 
             $table->timestamps();
         });
     }

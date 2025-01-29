@@ -11,7 +11,7 @@ class RecipeFactory extends Factory
         return [
             'user_id' => \App\Models\User::factory(),
             'title' => $this->faker->sentence(3),
-            'description' => $this->faker->paragraph(),
+            'public' => $this->faker->boolean(50),
             'category_id' => \App\Models\Category::factory(),
             'thumbnail' => $this->faker->imageUrl(640, 480, 'food', true, 'Recipe Thumbnail'),
             'prep_time' => $this->faker->numberBetween(10, 60),
@@ -21,6 +21,7 @@ class RecipeFactory extends Factory
             'total_protein' => $this->faker->randomFloat(2, 10, 50),
             'total_fat' => $this->faker->randomFloat(2, 5, 50),
             'total_carbs' => $this->faker->randomFloat(2, 10, 150),
+            'description' => $this->faker->paragraph(),
         ];
     }
 }

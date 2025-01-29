@@ -1,0 +1,138 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Recipe;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Tests\TestCase;
+
+class RecipeTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private $user;
+    private $otherUser;
+    private $recipe;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->user = User::factory()->create();
+        $this->otherUser = User::factory()->create();
+        $this->recipe = Recipe::factory()->create([
+            'user_id' => $this->user->id,
+            'public' => true,
+        ]);
+    }
+
+    public function test_it_lists_public_recipes_and_user_own_recipes()
+    {
+        Recipe::factory()->create(['public' => true]);
+        Recipe::factory()->create(['user_id' => $this->user->id, 'public' => false]);
+
+        $response = $this->actingAs($this->user)->getJson('/api/recipes');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(2, 'data');
+    }
+
+    public function test_it_lists_only_user_recipes_in_my_recipes()
+    {
+        Recipe::factory()->create(['user_id' => $this->otherUser->id]);
+
+        $response = $this->actingAs($this->user)->getJson('/api/my-recipes');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1, 'data');
+    }
+
+    public function test_it_allows_user_to_create_a_recipe()
+    {
+        $recipeData = [
+            'title' => 'New Recipe',
+            'description' => 'Delicious recipe',
+            'public' => true,
+            'ingredients' => [
+                ['id' => 1, 'quantity' => 200, 'unit' => 'g'],
+            ],
+            'steps' => [
+                ['description' => 'Step 1', 'order' => 1],
+            ],
+        ];
+
+        $response = $this->actingAs($this->user)->postJson('/api/recipes', $recipeData);
+
+        $response->assertStatus(201)
+            ->assertJsonFragment(['title' => 'New Recipe']);
+    }
+
+    public function test_it_validates_required_fields_on_recipe_creation()
+    {
+        $response = $this->actingAs($this->user)->postJson('/api/recipes', []);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['title', 'description', 'ingredients', 'steps']);
+    }
+
+    public function test_it_allows_users_to_view_their_own_or_public_recipes()
+    {
+        $publicRecipe = Recipe::factory()->create(['public' => true]);
+        $privateRecipe = Recipe::factory()->create(['user_id' => $this->user->id, 'public' => false]);
+
+        $this->actingAs($this->user)
+            ->getJson("/api/recipes/{$publicRecipe->id}")
+            ->assertStatus(200);
+
+        $this->actingAs($this->user)
+            ->getJson("/api/recipes/{$privateRecipe->id}")
+            ->assertStatus(200);
+    }
+
+    public function test_it_prevents_users_from_viewing_private_recipes_of_others()
+    {
+        $privateRecipe = Recipe::factory()->create(['user_id' => $this->otherUser->id, 'public' => false]);
+
+        $this->actingAs($this->user)
+            ->getJson("/api/recipes/{$privateRecipe->id}")
+            ->assertStatus(404);
+    }
+
+    public function test_it_allows_user_to_update_their_own_recipe()
+    {
+        $updateData = ['title' => 'Updated Recipe'];
+
+        $this->actingAs($this->user)
+            ->putJson("/api/recipes/{$this->recipe->id}", $updateData)
+            ->assertStatus(200)
+            ->assertJsonFragment(['title' => 'Updated Recipe']);
+    }
+
+    public function test_it_prevents_user_from_updating_someone_elses_recipe()
+    {
+        $recipe = Recipe::factory()->create(['user_id' => $this->otherUser->id]);
+
+        $this->actingAs($this->user)
+            ->putJson("/api/recipes/{$recipe->id}", ['title' => 'Hacked'])
+            ->assertStatus(403);
+    }
+
+    public function test_it_allows_user_to_delete_their_own_recipe()
+    {
+        $recipe = Recipe::factory()->create(['user_id' => $this->user->id]);
+
+        $this->actingAs($this->user)
+            ->deleteJson("/api/recipes/{$recipe->id}")
+            ->assertStatus(200);
+    }
+
+    public function test_it_prevents_user_from_deleting_someone_elses_recipe()
+    {
+        $recipe = Recipe::factory()->create(['user_id' => $this->otherUser->id]);
+
+        $this->actingAs($this->user)
+            ->deleteJson("/api/recipes/{$recipe->id}")
+            ->assertStatus(403);
+    }
+}
