@@ -11,7 +11,7 @@ class CreateRecipeStepsTable extends Migration
         Schema::create('recipe_steps', function (Blueprint $table) {
             $table->id();
             $table->foreignId('recipe_id')->constrained()->onDelete('cascade');
-            $table->integer('step_number');
+            $table->integer('step_number')->default(1);
             $table->text('description');
             $table->string('image_path')->nullable();
             $table->timestamps();

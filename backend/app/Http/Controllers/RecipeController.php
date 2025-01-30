@@ -90,9 +90,15 @@ class RecipeController extends Controller
 
     public function update(Request $request, $id)
     {
-        $recipe = Recipe::where('id', $id)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
+        $recipe = Recipe::find($id);
+
+        if (!$recipe) {
+            return response()->json(['error' => 'Recipe not found'], 404);
+        }
+
+        if ($recipe->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Forbidden'], 403);
+        }
 
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
@@ -142,15 +148,24 @@ class RecipeController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Something went wrong'], 500);
+            return response()->json([
+                'error' => 'Something went wrong',
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 
     public function destroy($id)
     {
-        $recipe = Recipe::where('id', $id)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
+        $recipe = Recipe::find($id);
+
+        if (!$recipe) {
+            return response()->json(['error' => 'Recipe not found'], 404);
+        }
+
+        if ($recipe->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Forbidden'], 403);
+        }
 
         if ($recipe->thumbnail) {
             Storage::disk('public')->delete($recipe->thumbnail);
@@ -160,4 +175,5 @@ class RecipeController extends Controller
 
         return response()->json(['message' => 'Recipe deleted'], 200);
     }
+
 }

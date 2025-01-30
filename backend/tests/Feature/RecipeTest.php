@@ -35,14 +35,14 @@ class RecipeTest extends TestCase
         $response = $this->actingAs($this->user)->getJson('/api/recipes');
 
         $response->assertStatus(200)
-            ->assertJsonCount(2, 'data');
+            ->assertJsonCount(3, 'data');
     }
 
     public function test_it_lists_only_user_recipes_in_my_recipes()
     {
         Recipe::factory()->create(['user_id' => $this->otherUser->id]);
 
-        $response = $this->actingAs($this->user)->getJson('/api/my-recipes');
+        $response = $this->actingAs($this->user)->getJson('/api/recipes/mine');
 
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data');
@@ -50,6 +50,8 @@ class RecipeTest extends TestCase
 
     public function test_it_allows_user_to_create_a_recipe()
     {
+        $ingredient = \App\Models\Ingredient::factory()->create();
+
         $recipeData = [
             'title' => 'New Recipe',
             'description' => 'Delicious recipe',
