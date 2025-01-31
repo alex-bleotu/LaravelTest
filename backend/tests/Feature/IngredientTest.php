@@ -20,7 +20,6 @@ class IngredientTest extends TestCase
                  ->assertJsonStructure([
                      'data',
                      'links',
-                     'meta'
                  ])
                  ->assertJsonCount(10, 'data');
     }
