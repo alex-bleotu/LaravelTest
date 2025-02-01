@@ -5,12 +5,14 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Ingredient;
+use PHPUnit\Framework\Attributes\Test;
 
 class IngredientTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_returns_paginated_ingredients()
+    #[Test]
+    public function it_returns_paginated_ingredients()
     {
         Ingredient::factory()->count(15)->create();
 
@@ -24,7 +26,8 @@ class IngredientTest extends TestCase
                  ->assertJsonCount(10, 'data');
     }
 
-    public function test_it_returns_a_single_ingredient()
+    #[Test]
+    public function it_returns_a_single_ingredient()
     {
         $ingredient = Ingredient::factory()->create();
 
@@ -37,7 +40,8 @@ class IngredientTest extends TestCase
                  ]);
     }
 
-    public function test_it_returns_a_404_if_ingredient_not_found()
+    #[Test]
+    public function it_returns_a_404_if_ingredient_not_found()
     {
         $response = $this->getJson('/api/ingredients/9999'); 
 

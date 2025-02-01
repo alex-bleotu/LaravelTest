@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Illuminate\Support\Facades\Session;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
 
 class AuthTest extends TestCase
 {
@@ -19,10 +20,8 @@ class AuthTest extends TestCase
         Session::start();
     }
 
-    /**
-     * Test successful user registration.
-     */
-    public function test_user_can_register()
+    #[Test]
+    public function user_can_register()
     {
         $response = $this->postJson('/api/auth/register', [
             'name' => 'John Doe',
@@ -50,10 +49,8 @@ class AuthTest extends TestCase
         ]);
     }
 
-    /**
-     * Test user registration with invalid data.
-     */
-    public function test_user_cannot_register_with_invalid_data()
+    #[Test]
+    public function user_cannot_register_with_invalid_data()
     {
         $response = $this->postJson('/api/auth/register', [
             'name' => '',
@@ -65,11 +62,9 @@ class AuthTest extends TestCase
         $response->assertStatus(422); 
         $response->assertJsonValidationErrors(['name', 'email', 'password']);
     }
-
-    /**
-     * Test successful user login.
-     */
-    public function test_user_can_login()
+    
+    #[Test]
+    public function user_can_login()
     {
         $user = User::factory()->create([
             'email' => 'john@example.com',
@@ -100,10 +95,8 @@ class AuthTest extends TestCase
         $this->assertNotNull($token);
     }
 
-    /**
-     * Test login with incorrect credentials.
-     */
-    public function test_user_cannot_login_with_invalid_credentials()
+    #[Test]
+    public function user_cannot_login_with_invalid_credentials()
     {
         $user = User::factory()->create([
             'email' => 'john@example.com',
@@ -123,10 +116,8 @@ class AuthTest extends TestCase
         $this->assertGuest();
     }
 
-    /**
-     * Test successful user logout.
-     */
-    public function test_user_can_logout()
+    #[Test]
+    public function user_can_logout()
     {
         $user = User::factory()->create();
         

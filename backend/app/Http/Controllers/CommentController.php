@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Recipe;
 
 class CommentController extends Controller
 {
@@ -25,5 +26,20 @@ class CommentController extends Controller
     {
         $recipe = Recipe::findOrFail($recipeId);
         return $recipe->comments()->with('user')->paginate(10);
+    }
+
+    public function destroy($recipeId, $commentId)
+    {
+        $recipe = Recipe::findOrFail($recipeId);
+
+        $comment = $recipe->comments()->findOrFail($commentId);
+
+        if ($comment->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $comment->delete();
+
+        return response()->json(null, 204);
     }
 }

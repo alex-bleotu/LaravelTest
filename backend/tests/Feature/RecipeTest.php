@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class RecipeTest extends TestCase
 {
@@ -27,7 +28,8 @@ class RecipeTest extends TestCase
         ]);
     }
 
-    public function test_it_lists_public_recipes_and_user_own_recipes()
+    #[Test]
+    public function it_lists_public_recipes_and_user_own_recipes()
     {
         Recipe::factory()->create(['public' => true]);
         Recipe::factory()->create(['user_id' => $this->user->id, 'public' => false]);
@@ -38,7 +40,8 @@ class RecipeTest extends TestCase
             ->assertJsonCount(3, 'data');
     }
 
-    public function test_it_lists_only_user_recipes_in_my_recipes()
+    #[Test]
+    public function it_lists_only_user_recipes_in_my_recipes()
     {
         Recipe::factory()->create(['user_id' => $this->otherUser->id]);
 
@@ -48,7 +51,8 @@ class RecipeTest extends TestCase
             ->assertJsonCount(1, 'data');
     }
 
-    public function test_it_allows_user_to_create_a_recipe()
+    #[Test]
+    public function it_allows_user_to_create_a_recipe()
     {
         $ingredient = \App\Models\Ingredient::factory()->create();
 
@@ -70,7 +74,8 @@ class RecipeTest extends TestCase
             ->assertJsonFragment(['title' => 'New Recipe']);
     }
 
-    public function test_it_validates_required_fields_on_recipe_creation()
+    #[Test]
+    public function it_validates_required_fields_on_recipe_creation()
     {
         $response = $this->actingAs($this->user)->postJson('/api/recipes', []);
 
@@ -78,7 +83,8 @@ class RecipeTest extends TestCase
             ->assertJsonValidationErrors(['title', 'description', 'ingredients', 'steps']);
     }
 
-    public function test_it_allows_users_to_view_their_own_or_public_recipes()
+    #[Test]
+    public function it_allows_users_to_view_their_own_or_public_recipes()
     {
         $publicRecipe = Recipe::factory()->create(['public' => true]);
         $privateRecipe = Recipe::factory()->create(['user_id' => $this->user->id, 'public' => false]);
@@ -92,7 +98,8 @@ class RecipeTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function test_it_prevents_users_from_viewing_private_recipes_of_others()
+    #[Test]
+    public function it_prevents_users_from_viewing_private_recipes_of_others()
     {
         $privateRecipe = Recipe::factory()->create(['user_id' => $this->otherUser->id, 'public' => false]);
 
@@ -101,7 +108,8 @@ class RecipeTest extends TestCase
             ->assertStatus(404);
     }
 
-    public function test_it_allows_user_to_update_their_own_recipe()
+    #[Test]
+    public function it_allows_user_to_update_their_own_recipe()
     {
         $updateData = ['title' => 'Updated Recipe'];
 
@@ -111,7 +119,8 @@ class RecipeTest extends TestCase
             ->assertJsonFragment(['title' => 'Updated Recipe']);
     }
 
-    public function test_it_prevents_user_from_updating_someone_elses_recipe()
+    #[Test]
+    public function it_prevents_user_from_updating_someone_elses_recipe()
     {
         $recipe = Recipe::factory()->create(['user_id' => $this->otherUser->id]);
 
@@ -120,7 +129,8 @@ class RecipeTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_it_allows_user_to_delete_their_own_recipe()
+    #[Test]
+    public function it_allows_user_to_delete_their_own_recipe()
     {
         $recipe = Recipe::factory()->create(['user_id' => $this->user->id]);
 
@@ -129,7 +139,8 @@ class RecipeTest extends TestCase
             ->assertStatus(200);
     }
 
-    public function test_it_prevents_user_from_deleting_someone_elses_recipe()
+    #[Test]
+    public function it_prevents_user_from_deleting_someone_elses_recipe()
     {
         $recipe = Recipe::factory()->create(['user_id' => $this->otherUser->id]);
 

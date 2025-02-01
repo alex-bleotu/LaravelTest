@@ -19,6 +19,8 @@ class RouteServiceProvider extends ServiceProvider
                 ->group(function () {
                     require base_path('routes/recipes.php');
                     require base_path('routes/ingredients.php');
+                    require base_path('routes/favorite.php');
+                    require base_path('routes/comments.php');
                 });
         });
     }
