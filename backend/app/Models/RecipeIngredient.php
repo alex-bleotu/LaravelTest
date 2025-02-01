@@ -16,6 +16,10 @@ class RecipeIngredient extends Model
         'unit',
     ];
 
+    protected $casts = [
+        'quantity' => 'float',
+    ];
+    
     public function recipe()
     {
         return $this->belongsTo(Recipe::class);

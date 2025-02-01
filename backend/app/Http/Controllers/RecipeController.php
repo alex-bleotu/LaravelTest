@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Recipe;
+use App\Models\RecipeIngredient;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -56,7 +57,9 @@ class RecipeController extends Controller
             ]);
 
             foreach ($validated['ingredients'] as $ingredient) {
-                $recipe->ingredients()->attach($ingredient['id'], [
+                RecipeIngredient::create([
+                    'recipe_id' => $recipe->id,
+                    'ingredient_id' => $ingredient['id'],
                     'quantity' => $ingredient['quantity'],
                     'unit' => $ingredient['unit'],
                 ]);
@@ -68,10 +71,9 @@ class RecipeController extends Controller
 
             DB::commit();
             return response()->json($recipe->load('ingredients', 'steps'), 201);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Something went wrong'], 500);
+            return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -127,9 +129,11 @@ class RecipeController extends Controller
             $recipe->update($validated);
 
             if ($request->has('ingredients')) {
-                $recipe->ingredients()->detach();
+                RecipeIngredient::where('recipe_id', $recipe->id)->delete();
                 foreach ($validated['ingredients'] as $ingredient) {
-                    $recipe->ingredients()->attach($ingredient['id'], [
+                    RecipeIngredient::create([
+                        'recipe_id' => $recipe->id,
+                        'ingredient_id' => $ingredient['id'],
                         'quantity' => $ingredient['quantity'],
                         'unit' => $ingredient['unit'],
                     ]);
@@ -145,13 +149,9 @@ class RecipeController extends Controller
 
             DB::commit();
             return response()->json($recipe->load('ingredients', 'steps'), 200);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'error' => 'Something went wrong',
-                'message' => $e->getMessage(),
-            ], 500);
+            return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -175,5 +175,4 @@ class RecipeController extends Controller
 
         return response()->json(['message' => 'Recipe deleted'], 200);
     }
-
 }

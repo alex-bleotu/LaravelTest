@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CommentController;
 
 Route::prefix('/recipes')->group(function () {

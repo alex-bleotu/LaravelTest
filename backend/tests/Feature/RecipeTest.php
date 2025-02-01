@@ -29,7 +29,7 @@ class RecipeTest extends TestCase
     }
 
     #[Test]
-    public function it_lists_public_recipes_and_user_own_recipes()
+    public function lists_public_recipes_and_user_own_recipes()
     {
         Recipe::factory()->create(['public' => true]);
         Recipe::factory()->create(['user_id' => $this->user->id, 'public' => false]);
@@ -41,7 +41,7 @@ class RecipeTest extends TestCase
     }
 
     #[Test]
-    public function it_lists_only_user_recipes_in_my_recipes()
+    public function lists_only_user_recipes_in_my_recipes()
     {
         Recipe::factory()->create(['user_id' => $this->otherUser->id]);
 
@@ -52,16 +52,21 @@ class RecipeTest extends TestCase
     }
 
     #[Test]
-    public function it_allows_user_to_create_a_recipe()
+    public function allows_user_to_create_a_recipe()
     {
         $ingredient = \App\Models\Ingredient::factory()->create();
+
+        $recipe_ingredient = \App\Models\RecipeIngredient::factory()->create([
+            'recipe_id' => $this->recipe->id,
+            'ingredient_id' => $ingredient->id,
+        ]);
 
         $recipeData = [
             'title' => 'New Recipe',
             'description' => 'Delicious recipe',
             'public' => true,
             'ingredients' => [
-                ['id' => $ingredient->id, 'quantity' => 200, 'unit' => 'g'],
+                ['id' => $recipe_ingredient->id, 'quantity' => 200, 'unit' => 'g'],
             ],
             'steps' => [
                 ['description' => 'Step 1', 'order' => 1],
@@ -75,7 +80,7 @@ class RecipeTest extends TestCase
     }
 
     #[Test]
-    public function it_validates_required_fields_on_recipe_creation()
+    public function validates_required_fields_on_recipe_creation()
     {
         $response = $this->actingAs($this->user)->postJson('/api/recipes', []);
 
@@ -84,7 +89,7 @@ class RecipeTest extends TestCase
     }
 
     #[Test]
-    public function it_allows_users_to_view_their_own_or_public_recipes()
+    public function allows_users_to_view_their_own_or_public_recipes()
     {
         $publicRecipe = Recipe::factory()->create(['public' => true]);
         $privateRecipe = Recipe::factory()->create(['user_id' => $this->user->id, 'public' => false]);
@@ -99,7 +104,7 @@ class RecipeTest extends TestCase
     }
 
     #[Test]
-    public function it_prevents_users_from_viewing_private_recipes_of_others()
+    public function prevents_users_from_viewing_private_recipes_of_others()
     {
         $privateRecipe = Recipe::factory()->create(['user_id' => $this->otherUser->id, 'public' => false]);
 
@@ -109,7 +114,7 @@ class RecipeTest extends TestCase
     }
 
     #[Test]
-    public function it_allows_user_to_update_their_own_recipe()
+    public function allows_user_to_update_their_own_recipe()
     {
         $updateData = ['title' => 'Updated Recipe'];
 
@@ -120,7 +125,7 @@ class RecipeTest extends TestCase
     }
 
     #[Test]
-    public function it_prevents_user_from_updating_someone_elses_recipe()
+    public function prevents_user_from_updating_someone_elses_recipe()
     {
         $recipe = Recipe::factory()->create(['user_id' => $this->otherUser->id]);
 
@@ -130,7 +135,7 @@ class RecipeTest extends TestCase
     }
 
     #[Test]
-    public function it_allows_user_to_delete_their_own_recipe()
+    public function allows_user_to_delete_their_own_recipe()
     {
         $recipe = Recipe::factory()->create(['user_id' => $this->user->id]);
 
@@ -140,7 +145,7 @@ class RecipeTest extends TestCase
     }
 
     #[Test]
-    public function it_prevents_user_from_deleting_someone_elses_recipe()
+    public function prevents_user_from_deleting_someone_elses_recipe()
     {
         $recipe = Recipe::factory()->create(['user_id' => $this->otherUser->id]);
 

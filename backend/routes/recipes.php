@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\RecipeController;
-use Illuminate\Support\Facades\Route;
 
 Route::prefix('recipes')->group(function () {
     Route::get('/', [RecipeController::class, 'index']);

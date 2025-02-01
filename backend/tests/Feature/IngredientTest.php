@@ -12,7 +12,7 @@ class IngredientTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function it_returns_paginated_ingredients()
+    public function returns_paginated_ingredients()
     {
         Ingredient::factory()->count(15)->create();
 
@@ -27,7 +27,7 @@ class IngredientTest extends TestCase
     }
 
     #[Test]
-    public function it_returns_a_single_ingredient()
+    public function returns_a_single_ingredient()
     {
         $ingredient = Ingredient::factory()->create();
 
@@ -41,7 +41,7 @@ class IngredientTest extends TestCase
     }
 
     #[Test]
-    public function it_returns_a_404_if_ingredient_not_found()
+    public function returns_a_404_if_ingredient_not_found()
     {
         $response = $this->getJson('/api/ingredients/9999'); 
 

@@ -21,6 +21,9 @@ class RouteServiceProvider extends ServiceProvider
                     require base_path('routes/ingredients.php');
                     require base_path('routes/favorite.php');
                     require base_path('routes/comments.php');
+                    require base_path('routes/category.php');
+                    require base_path('routes/recipeIngredient.php');
+                    require base_path('routes/recipeStep.php');
                 });
         });
     }
