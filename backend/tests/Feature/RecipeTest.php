@@ -55,18 +55,13 @@ class RecipeTest extends TestCase
     public function allows_user_to_create_a_recipe()
     {
         $ingredient = \App\Models\Ingredient::factory()->create();
-
-        $recipe_ingredient = \App\Models\RecipeIngredient::factory()->create([
-            'recipe_id' => $this->recipe->id,
-            'ingredient_id' => $ingredient->id,
-        ]);
-
+        
         $recipeData = [
             'title' => 'New Recipe',
             'description' => 'Delicious recipe',
             'public' => true,
             'ingredients' => [
-                ['id' => $recipe_ingredient->id, 'quantity' => 200, 'unit' => 'g'],
+                ['id' => $ingredient->id, 'quantity' => 200, 'unit' => 'g'],
             ],
             'steps' => [
                 ['description' => 'Step 1', 'order' => 1],
