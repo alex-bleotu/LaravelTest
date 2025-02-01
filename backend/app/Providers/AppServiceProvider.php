@@ -21,14 +21,5 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Schema::defaultStringLength(191);
-
-        Validator::extend('uppercase', function ($attribute, $value, $parameters, $validator) {
-            return strtoupper($value) === $value;
-        });
-
-        JsonResource::withoutWrapping();
-
-        $this->loadRoutesFrom(base_path('routes/auth.php'));
     }
 }
