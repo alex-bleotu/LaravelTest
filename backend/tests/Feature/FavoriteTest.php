@@ -60,7 +60,7 @@ class FavoriteTest extends TestCase
         
         $this->user->favorites()->attach($this->recipe->id);
         
-        $response = $this->actingAs($this->user)->getJson("/api/recipes/favorites/index");
+        $response = $this->actingAs($this->user)->getJson("/api/recipes/favorites");
 
         $response->assertStatus(200)
                  ->assertJsonStructure(['data' => [['id', 'title', 'description']]]);
@@ -75,7 +75,7 @@ class FavoriteTest extends TestCase
         $response = $this->deleteJson("/api/recipes/favorites/{$this->recipe->id}");
         $response->assertStatus(401);
 
-        $response = $this->getJson("/api/recipes/favorites/index");
+        $response = $this->getJson("/api/recipes/favorites");
         $response->assertStatus(401);
     }
 }
