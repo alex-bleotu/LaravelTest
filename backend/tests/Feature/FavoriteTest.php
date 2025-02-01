@@ -18,7 +18,6 @@ class FavoriteTest extends TestCase
         parent::setUp();
         
         $this->user = User::factory()->create();
-        Sanctum::actingAs($this->user);
 
         $this->recipe = Recipe::factory()->create(['user_id' => $this->user->id]);
     }
@@ -26,6 +25,8 @@ class FavoriteTest extends TestCase
     #[Test]
     public function user_can_add_recipe_to_favorites()
     {
+        Sanctum::actingAs($this->user);
+
         $response = $this->actingAs($this->user)->postJson("/api/recipes/favorites/{$this->recipe->id}");
 
         $response->assertStatus(201)
@@ -39,6 +40,8 @@ class FavoriteTest extends TestCase
     #[Test]
     public function user_can_remove_recipe_from_favorites()
     {
+        Sanctum::actingAs($this->user);
+
         $this->user->favorites()->attach($this->recipe->id);
 
         $response = $this->actingAs($this->user)->deleteJson("/api/recipes/favorites/{$this->recipe->id}");
@@ -53,9 +56,11 @@ class FavoriteTest extends TestCase
     #[Test]
     public function user_can_view_favorite_recipes()
     {
+        Sanctum::actingAs($this->user);
+        
         $this->user->favorites()->attach($this->recipe->id);
         
-        $response = $this->actingAs($this->user)->getJson("/api/recipes/favorites");
+        $response = $this->actingAs($this->user)->getJson("/api/recipes/favorites/index");
 
         $response->assertStatus(200)
                  ->assertJsonStructure(['data' => [['id', 'title', 'description']]]);
@@ -70,7 +75,7 @@ class FavoriteTest extends TestCase
         $response = $this->deleteJson("/api/recipes/favorites/{$this->recipe->id}");
         $response->assertStatus(401);
 
-        $response = $this->getJson("/api/recipes/favorites");
+        $response = $this->getJson("/api/recipes/favorites/index");
         $response->assertStatus(401);
     }
 }
