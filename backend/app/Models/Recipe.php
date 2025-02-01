@@ -22,6 +22,11 @@ class Recipe extends Model
         'total_protein',
         'total_fat',
         'total_carbs',
+        'ingredients',
+    ];
+
+    protected $casts = [
+        'ingredients' => 'array',
     ];
 
     public function user()
@@ -32,13 +37,6 @@ class Recipe extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
-    }
-
-    public function ingredients()
-    {
-        return $this->belongsToMany(Ingredient::class, 'recipe_ingredients')
-            ->withPivot('quantity', 'unit')
-            ->withTimestamps();
     }
 
     public function steps()

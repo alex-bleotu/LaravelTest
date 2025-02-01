@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Recipe;
-use App\Models\RecipeIngredient;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,14 +13,14 @@ class RecipeController extends Controller
     {
         return Recipe::where('public', true)
             ->orWhere('user_id', auth()->id())
-            ->with(['ingredients', 'steps'])
+            ->with('steps') // Removed 'ingredients' since it's JSON
             ->paginate(10);
     }
 
     public function myRecipes()
     {
         return Recipe::where('user_id', auth()->id())
-            ->with(['ingredients', 'steps'])
+            ->with('steps')
             ->paginate(10);
     }
 
@@ -32,7 +31,7 @@ class RecipeController extends Controller
             'description' => 'required|string',
             'thumbnail' => 'nullable|image|max:2048',
             'ingredients' => 'required|array',
-            'ingredients.*.id' => 'required|exists:ingredients,id',
+            'ingredients.*.ingredient_id' => 'required|exists:ingredients,id',
             'ingredients.*.quantity' => 'required|numeric|min:0.1',
             'ingredients.*.unit' => 'required|string|max:50',
             'steps' => 'required|array',
@@ -41,40 +40,24 @@ class RecipeController extends Controller
             'public' => 'boolean',
         ]);
 
-        DB::beginTransaction();
-
-        try {
-            if ($request->hasFile('thumbnail')) {
-                $validated['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
-            }
-
-            $recipe = Recipe::create([
-                'user_id' => auth()->id(),
-                'title' => $validated['title'],
-                'description' => $validated['description'],
-                'thumbnail' => $validated['thumbnail'] ?? null,
-                'public' => $validated['public'] ?? false,
-            ]);
-
-            foreach ($validated['ingredients'] as $ingredient) {
-                RecipeIngredient::create([
-                    'recipe_id' => $recipe->id,
-                    'ingredient_id' => $ingredient['id'],
-                    'quantity' => $ingredient['quantity'],
-                    'unit' => $ingredient['unit'],
-                ]);
-            }
-
-            foreach ($validated['steps'] as $step) {
-                $recipe->steps()->create($step);
-            }
-
-            DB::commit();
-            return response()->json($recipe->load('ingredients', 'steps'), 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
+        if ($request->hasFile('thumbnail')) {
+            $validated['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
         }
+
+        $recipe = Recipe::create([
+            'user_id' => auth()->id(),
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'thumbnail' => $validated['thumbnail'] ?? null,
+            'public' => $validated['public'] ?? false,
+            'ingredients' => json_encode($validated['ingredients']), // Store ingredients as JSON
+        ]);
+
+        foreach ($validated['steps'] as $step) {
+            $recipe->steps()->create($step);
+        }
+
+        return response()->json($recipe->load('steps'), 201);
     }
 
     public function show($id)
@@ -84,7 +67,7 @@ class RecipeController extends Controller
                 $query->where('public', true)
                       ->orWhere('user_id', auth()->id());
             })
-            ->with(['ingredients', 'steps'])
+            ->with('steps') // Removed 'ingredients'
             ->firstOrFail();
 
         return response()->json($recipe);
@@ -107,7 +90,7 @@ class RecipeController extends Controller
             'description' => 'sometimes|string',
             'thumbnail' => 'nullable|image|max:2048',
             'ingredients' => 'sometimes|array',
-            'ingredients.*.id' => 'required|exists:ingredients,id',
+            'ingredients.*.ingredient_id' => 'required|exists:ingredients,id',
             'ingredients.*.quantity' => 'required|numeric|min:0.1',
             'ingredients.*.unit' => 'required|string|max:50',
             'steps' => 'sometimes|array',
@@ -126,18 +109,10 @@ class RecipeController extends Controller
                 $validated['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
             }
 
-            $recipe->update($validated);
-
             if ($request->has('ingredients')) {
-                RecipeIngredient::where('recipe_id', $recipe->id)->delete();
-                foreach ($validated['ingredients'] as $ingredient) {
-                    RecipeIngredient::create([
-                        'recipe_id' => $recipe->id,
-                        'ingredient_id' => $ingredient['id'],
-                        'quantity' => $ingredient['quantity'],
-                        'unit' => $ingredient['unit'],
-                    ]);
-                }
+                $recipe->update([
+                    'ingredients' => json_encode($validated['ingredients'])
+                ]);
             }
 
             if ($request->has('steps')) {
@@ -147,8 +122,10 @@ class RecipeController extends Controller
                 }
             }
 
+            $recipe->update($validated);
+
             DB::commit();
-            return response()->json($recipe->load('ingredients', 'steps'), 200);
+            return response()->json($recipe->load('steps'), 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);

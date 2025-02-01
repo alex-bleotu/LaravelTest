@@ -15,6 +15,7 @@ class CreateRecipesTable extends Migration
             $table->text('description')->nullable();
             $table->foreignId('category_id')->nullable()->constrained()->onDelete('set null');
             $table->string('thumbnail')->nullable();
+            $table->json('ingredients')->nullable(); 
             $table->integer('prep_time')->nullable();
             $table->integer('cook_time')->nullable();
             $table->integer('servings')->nullable();

@@ -18,11 +18,4 @@ class Ingredient extends Model
         'carbs',
         'fiber',
     ];
-
-    public function recipes()
-    {
-        return $this->belongsToMany(Recipe::class, 'recipe_ingredients')
-            ->withPivot('quantity', 'unit')
-            ->withTimestamps();
-    }
 }

@@ -61,7 +61,7 @@ class RecipeTest extends TestCase
             'description' => 'Delicious recipe',
             'public' => true,
             'ingredients' => [
-                ['id' => $ingredient->id, 'quantity' => 200, 'unit' => 'g'],
+                ['ingredient_id' => $ingredient->id, 'quantity' => 200, 'unit' => 'g'],
             ],
             'steps' => [
                 ['description' => 'Step 1', 'order' => 1],
